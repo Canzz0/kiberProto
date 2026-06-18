@@ -3,7 +3,8 @@ syntax = "proto3";
 package analyc.v1;
 
 service AnalyticService {
-  rpc AnalyzeUser (AnalyzeUserRequest) returns (AnalyzeUserResponse);
+  // Server streaming: analiz sirasinda surekli durum bildirimi gonderir.
+  rpc AnalyzeUser (AnalyzeUserRequest) returns (stream AnalyzeUserEvent);
 }
 
 message AnalyzeUserRequest {
@@ -13,13 +14,26 @@ message AnalyzeUserRequest {
 message SourceResult {
   string source = 1;   // google | holidaycheck | expedia | tripadvisor | booking | zoover
   string method = 2;   // api | bot
-  string status = 3;   // completed | failed | skipped
+  string status = 3;   // ready | failed | skipped
   int32 collected = 4; // toplanan yorum sayisi
   string message = 5;  // bilgi / hata mesaji
 }
 
 message AnalyzeUserResponse {
   int32 user_id = 1;
-  string status = 2;   // completed | failed | no_active_source | not_found
+  string status = 2;   // completed | no_active_source | not_found
   repeated SourceResult results = 3;
+}
+
+// phase: started | source_started | source_progress | source_done | completed
+message AnalyzeUserEvent {
+  string phase = 1;
+  int32 user_id = 2;
+  string source = 3;
+  int32 source_index = 4;
+  int32 source_total = 5;
+  int32 collected = 6;
+  string message = 7;
+  SourceResult source_result = 8;      // source_done
+  AnalyzeUserResponse result = 9;      // completed
 }
