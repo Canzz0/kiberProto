@@ -15,6 +15,9 @@ message GuessRequest {
   string guid = 6;
   string category = 7;
   string message = 8;
+  // production=false iken gateway'in gönderdiği prompt/tool override paketi
+  // (JSON string). Boş ise chat-bot kod içindeki varsayılanları kullanır.
+  string aiOverrides = 9;
 }
 
 // Nested message structure reflecting the described apiResponse JSON
