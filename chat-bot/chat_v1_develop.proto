@@ -18,8 +18,8 @@ message GuessRequest {
   // production=false iken gateway'in gönderdiği prompt/tool override paketi
   // (JSON string). Boş ise chat-bot kod içindeki varsayılanları kullanır.
   string aiOverrides = 9;
-    string checkin = 11
-  string checkout = 12
+    string checkin = 11;
+  string checkout = 12;
 }
 
 // Nested message structure reflecting the described apiResponse JSON
@@ -34,8 +34,8 @@ message ApiResponse {
   string messageType = 8;
   string response = 9;
   int32 roomNumber = 10;
-  string checkin = 11
-  string checkout = 12
+  string checkin = 11;
+  string checkout = 12;
 }
 
 message GuessResponse {
