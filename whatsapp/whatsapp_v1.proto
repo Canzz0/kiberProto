@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package whatsapp.v1;
+
+service WhatsAppService {
+  // Meta WhatsApp Business hesabina tanimli onayli mesaj sablonlarini getirir.
+  rpc GetMessageTemplates (GetMessageTemplatesRequest) returns (GetMessageTemplatesResponse);
+
+  // Serbest metin (text) mesaji gonderir.
+  rpc SendTextMessage (SendTextMessageRequest) returns (SendMessageResponse);
+
+  // Onceden onaylanmis bir sablon ile mesaj gonderir.
+  rpc SendTemplateMessage (SendTemplateMessageRequest) returns (SendMessageResponse);
+
+  // Webhook uzerinden gelen ham WhatsApp payload'ini normalize eder.
+  rpc ReceiveMessage (ReceiveMessageRequest) returns (ReceiveMessageResponse);
+}
+
+message GetMessageTemplatesRequest {}
+
+message MessageTemplate {
+  string id = 1;
+  string name = 2;
+  string language = 3;
+  string status = 4;
+  string category = 5;
+  // components dizisinin ham JSON hali (body/header/button parametreleri icin)
+  string componentsJson = 6;
+}
+
+message GetMessageTemplatesResponse {
+  repeated MessageTemplate templates = 1;
+}
+
+message SendTextMessageRequest {
+  // Ulke kodu ile birlikte alici telefon numarasi (orn. 905551112233)
+  string to = 1;
+  string body = 2;
+}
+
+message TemplateParameter {
+  string type = 1;
+  string text = 2;
+}
+
+message TemplateComponent {
+  string type = 1;
+  repeated TemplateParameter parameters = 2;
+}
+
+message SendTemplateMessageRequest {
+  string to = 1;
+  string templateName = 2;
+  string languageCode = 3;
+  repeated TemplateComponent components = 4;
+}
+
+message SendMessageResponse {
+  bool success = 1;
+  string messageId = 2;
+  string rawResponse = 3;
+}
+
+message ReceiveMessageRequest {
+  // Meta webhook POST body'sinin ham JSON string hali
+  string rawPayload = 1;
+}
+
+message IncomingMessage {
+  string from = 1;
+  string messageId = 2;
+  string type = 3;
+  string text = 4;
+  string timestamp = 5;
+}
+
+message ReceiveMessageResponse {
+  repeated IncomingMessage messages = 1;
+}
