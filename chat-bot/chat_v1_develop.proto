@@ -6,6 +6,20 @@ service ChatService {
   rpc Guess (GuessRequest) returns (GuessResponse);
 }
 
+service TranslateService {
+  rpc Translate (TranslateRequest) returns (TranslateResponse);
+}
+
+message TranslateRequest {
+  string text = 1;
+  string targetLang = 2;
+}
+
+message TranslateResponse {
+  string translatedText = 1;
+  string originalLang = 2;
+}
+
 message GuessRequest {
   string departmanlar = 1;
   string konumlar = 2;

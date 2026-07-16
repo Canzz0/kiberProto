@@ -70,8 +70,10 @@ message IncomingMessage {
   string from = 1;
   string messageId = 2;
   string type = 3;
-  string text = 4;
-  string timestamp = 5;
+  string main_message = 4;
+  string translate_message = 5;
+  string timestamp = 6;
+  string platform = 7;
 }
 
 message ReceiveMessageResponse {
