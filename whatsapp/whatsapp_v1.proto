@@ -74,6 +74,8 @@ message IncomingMessage {
   string translate_message = 5;
   string timestamp = 6;
   string platform = 7;
+  // Meta webhook metadata.display_phone_number — otelin kendi WP numarası
+  string display_phone_number = 8;
 }
 
 message ReceiveMessageResponse {

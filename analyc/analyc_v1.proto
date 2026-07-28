@@ -5,10 +5,23 @@ package analyc.v1;
 service AnalyticService {
   // Server streaming: analiz sirasinda surekli durum bildirimi gonderir.
   rpc AnalyzeUser (AnalyzeUserRequest) returns (stream AnalyzeUserEvent);
+
+  // Devam eden analizi durdurur (kooperatif iptal). Stream'in kapanmasi iptal
+  // DEGILDIR; iptal daima bu RPC ile istenir.
+  rpc StopAnalyzeUser (StopAnalyzeUserRequest) returns (StopAnalyzeUserResponse);
 }
 
 message AnalyzeUserRequest {
   int32 user_id = 1;
+}
+
+message StopAnalyzeUserRequest {
+  int32 user_id = 1;
+}
+
+message StopAnalyzeUserResponse {
+  string status = 1;   // stopped | not_running | not_found
+  string message = 2;
 }
 
 message SourceResult {
@@ -21,11 +34,12 @@ message SourceResult {
 
 message AnalyzeUserResponse {
   int32 user_id = 1;
-  string status = 2;   // completed | no_active_source | not_found
+  string status = 2;   // completed | no_active_source | cancelled | failed | not_found
   repeated SourceResult results = 3;
 }
 
-// phase: started | source_started | source_progress | source_done | completed
+// phase: started | source_started | source_progress | source_done
+//        | completed | cancelled | failed
 message AnalyzeUserEvent {
   string phase = 1;
   int32 user_id = 2;
