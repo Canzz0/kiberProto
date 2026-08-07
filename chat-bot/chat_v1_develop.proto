@@ -4,7 +4,65 @@ package chat.v1;
 
 service ChatService {
   rpc Guess (GuessRequest) returns (GuessResponse);
+  // NPM raporlama: otel yoneticisinin serbest metin sorusu.
   rpc ReportQuery (ReportQueryRequest) returns (ReportQueryResponse);
+}
+
+message ReportQueryRequest {
+  string question = 1;
+}
+
+message ReportQueryResponse {
+  // Kullanicinin sordugu soru (echo).
+  string question = 1;
+  // Gemini'nin o soruya ozel urettigi SELECT sorgusu.
+  string generatedSql = 2;
+  // Sonuc satirlari JSON dizisi olarak. Satir semasi sorguya gore degistigi
+  // icin proto mesaji yerine JSON string tasinir; gateway bunu parse edip
+  // HTTP cevabinda gercek dizi olarak verir. Hata durumunda "[]".
+  string rowsJson = 3;
+  int32 rowCount = 4;
+  // Yalnizca sorgu calistirilamadiginda dolu olur.
+  string note = 5;
+  // Sorgunun calisma suresi (ms). Basarisizsa 0.
+  int32 durationMs = 6;
+
+  // SQL uretimi sirasindaki Gemini token kullanimi.
+  // proto3'te int32 null olamaz (yokken 0 doner), bu yuzden varligi
+  // `hasTokenUsage` ile tasinir: false ise gateway bu ucunu null dondurur.
+  int32 totalTokens = 7;
+  int32 inputTokens = 8;
+  int32 outputTokens = 9;
+  bool hasTokenUsage = 10;
+
+  // Sonucun insan diliyle 1-2 cumlelik ozeti. Gercek satirlara bakilarak
+  // uretilir. Uretilemezse bos olabilir.
+  string summary = 11;
+  // Frontend'e gorsellestirme onerisi.
+  ReportView view = 12;
+}
+
+message ReportViewColumn {
+  // Sonuc satirlarindaki alan/alias adi.
+  string field = 1;
+  // Insan diline uygun baslik (sabit sozlukten doldurulur).
+  string label = 2;
+}
+
+message ReportView {
+  // "bar" | "pie" | "line" | "table"
+  string type = 1;
+  // bar/pie/line icin dolu; table icin bos.
+  string xField = 2;
+  // Geriye donuk uyumluluk: yFields'in ilk elemani. Yeni istemciler
+  // yFields'i kullanmalidir.
+  string yField = 3;
+  string title = 4;
+  // Yalnizca type == "table" oldugunda dolu.
+  repeated ReportViewColumn columns = 5;
+  // Cok serili grafikler icin tum y-alanlari (orn. yila gore ayri sutunlar).
+  // Tek seri durumunda tek elemanlidir.
+  repeated string yFields = 6;
 }
 
 service TranslateService {
@@ -58,38 +116,4 @@ message GuessResponse {
   int32 totalTokens = 2;
   int32 inputTokens = 3;
   int32 outputTokens = 4;
-}
-
-// NPM raporlama — serbest metin soru -> SQL + sonuc ozeti
-message ReportQueryRequest {
-  string question = 1;
-}
-
-message ReportViewColumn {
-  string field = 1;
-  string label = 2;
-}
-
-message ReportView {
-  string type = 1; // bar | pie | line | table
-  string xField = 2;
-  string yField = 3;
-  repeated string yFields = 4;
-  string title = 5;
-  repeated ReportViewColumn columns = 6;
-}
-
-message ReportQueryResponse {
-  string question = 1;
-  string generatedSql = 2;
-  string rowsJson = 3;
-  int32 rowCount = 4;
-  string note = 5;
-  int32 durationMs = 6;
-  int32 totalTokens = 7;
-  int32 inputTokens = 8;
-  int32 outputTokens = 9;
-  bool hasTokenUsage = 10;
-  string summary = 11;
-  ReportView view = 12;
 }
