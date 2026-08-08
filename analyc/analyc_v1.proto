@@ -6,12 +6,20 @@ service AnalyticService {
   // Server streaming: analiz sirasinda surekli durum bildirimi gonderir.
   rpc AnalyzeUser (AnalyzeUserRequest) returns (stream AnalyzeUserEvent);
 
+  // Mevcut yorumlarin sentiment'ini silip ABSA ile yeniden analiz eder
+  // (scraping yok). Ayni event stream sozlesmesi; source="reanalyze".
+  rpc ReAnalyzeUser (ReAnalyzeUserRequest) returns (stream AnalyzeUserEvent);
+
   // Devam eden analizi durdurur (kooperatif iptal). Stream'in kapanmasi iptal
   // DEGILDIR; iptal daima bu RPC ile istenir.
   rpc StopAnalyzeUser (StopAnalyzeUserRequest) returns (StopAnalyzeUserResponse);
 }
 
 message AnalyzeUserRequest {
+  int32 user_id = 1;
+}
+
+message ReAnalyzeUserRequest {
   int32 user_id = 1;
 }
 
