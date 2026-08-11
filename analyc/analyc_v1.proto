@@ -10,6 +10,10 @@ service AnalyticService {
   // (scraping yok). Ayni event stream sozlesmesi; source="reanalyze".
   rpc ReAnalyzeUser (ReAnalyzeUserRequest) returns (stream AnalyzeUserEvent);
 
+  // Mevcut yorumlari Gemini API (31-aspect ABSA) ile yeniden analiz eder
+  // (scraping yok). Ayni event stream sozlesmesi; source="gemini-analyze".
+  rpc GeminiAnalyzeUser (GeminiAnalyzeUserRequest) returns (stream AnalyzeUserEvent);
+
   // Devam eden analizi durdurur (kooperatif iptal). Stream'in kapanmasi iptal
   // DEGILDIR; iptal daima bu RPC ile istenir.
   rpc StopAnalyzeUser (StopAnalyzeUserRequest) returns (StopAnalyzeUserResponse);
@@ -20,6 +24,10 @@ message AnalyzeUserRequest {
 }
 
 message ReAnalyzeUserRequest {
+  int32 user_id = 1;
+}
+
+message GeminiAnalyzeUserRequest {
   int32 user_id = 1;
 }
 
