@@ -14,9 +14,17 @@ service AnalyticService {
   // (scraping yok). Ayni event stream sozlesmesi; source="gemini-analyze".
   rpc GeminiAnalyzeUser (GeminiAnalyzeUserRequest) returns (stream AnalyzeUserEvent);
 
-  // Devam eden analizi durdurur (kooperatif iptal). Stream'in kapanmasi iptal
-  // DEGILDIR; iptal daima bu RPC ile istenir.
+  // Devam eden otel analizini durdurur (kooperatif iptal). Stream'in kapanmasi
+  // iptal DEGILDIR; iptal daima bu RPC ile istenir.
   rpc StopAnalyzeUser (StopAnalyzeUserRequest) returns (StopAnalyzeUserResponse);
+
+  // Google News cekimi (streaming). analyze_runs'a hotel_id=0 + current_source=news
+  // yazar. Baglanti kopmasi IPTAL DEGILDIR; iptal icin StopFetchNews kullan.
+  // category bos/"all" -> tum kategoriler; mode: update | backfill.
+  rpc FetchNews (FetchNewsRequest) returns (stream AnalyzeUserEvent);
+
+  // Devam eden news cekimini durdurur (analyze_runs hotel_id=0 aktif kayit).
+  rpc StopFetchNews (StopFetchNewsRequest) returns (StopFetchNewsResponse);
 }
 
 message AnalyzeUserRequest {
@@ -40,17 +48,37 @@ message StopAnalyzeUserResponse {
   string message = 2;
 }
 
+message FetchNewsRequest {
+  string category = 1; // bos veya "all" = tumu; orn. turkey_economy
+  string mode = 2;     // update (varsayilan) | backfill
+}
+
+// Eski unary yanit; stream completed event'indeki AnalyzeUserResponse kullanilir.
+// Geriye uyumluluk / dokumantasyon icin tutulur (RPC donus tipi stream'dir).
+message FetchNewsResponse {
+  string status = 1;   // completed | failed | cancelled
+  int32 collected = 2;
+  string message = 3;
+}
+
+message StopFetchNewsRequest {}
+
+message StopFetchNewsResponse {
+  string status = 1;   // stopped | not_running
+  string message = 2;
+}
+
 message SourceResult {
-  string source = 1;   // google | holidaycheck | expedia | tripadvisor | booking | zoover
+  string source = 1;   // google | ... | news
   string method = 2;   // api | bot
   string status = 3;   // ready | failed | skipped
-  int32 collected = 4; // toplanan yorum sayisi
-  string message = 5;  // bilgi / hata mesaji
+  int32 collected = 4;
+  string message = 5;
 }
 
 message AnalyzeUserResponse {
-  int32 user_id = 1;
-  string status = 2;   // completed | no_active_source | cancelled | failed | not_found
+  int32 user_id = 1;   // otel: HotelInfo.id; news: 0
+  string status = 2;   // completed | cancelled | failed | ...
   repeated SourceResult results = 3;
 }
 
@@ -64,6 +92,6 @@ message AnalyzeUserEvent {
   int32 source_total = 5;
   int32 collected = 6;
   string message = 7;
-  SourceResult source_result = 8;      // source_done
-  AnalyzeUserResponse result = 9;      // completed
+  SourceResult source_result = 8;
+  AnalyzeUserResponse result = 9;
 }
