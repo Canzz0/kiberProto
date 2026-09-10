@@ -25,6 +25,14 @@ service AnalyticService {
 
   // Devam eden news cekimini durdurur (analyze_runs hotel_id=0 aktif kayit).
   rpc StopFetchNews (StopFetchNewsRequest) returns (StopFetchNewsResponse);
+
+  // Bolge / rakip otel Places cekimi (streaming). analyze_runs'a hotel_id=-1
+  // + current_source=region-hotels yazar. Baglanti kopmasi IPTAL DEGILDIR;
+  // iptal icin StopFetchRegionHotels kullan. user_id: HotelInfo.id; 0 = tumu.
+  rpc FetchRegionHotels (FetchRegionHotelsRequest) returns (stream AnalyzeUserEvent);
+
+  // Devam eden bolge otel cekimini durdurur (analyze_runs hotel_id=-1).
+  rpc StopFetchRegionHotels (StopFetchRegionHotelsRequest) returns (StopFetchRegionHotelsResponse);
 }
 
 message AnalyzeUserRequest {
@@ -68,8 +76,19 @@ message StopFetchNewsResponse {
   string message = 2;
 }
 
+message FetchRegionHotelsRequest {
+  int32 user_id = 1;  // HotelInfo.id; 0 = tum etkin target'lar
+}
+
+message StopFetchRegionHotelsRequest {}
+
+message StopFetchRegionHotelsResponse {
+  string status = 1;   // stopped | not_running
+  string message = 2;
+}
+
 message SourceResult {
-  string source = 1;   // google | ... | news
+  string source = 1;   // google | ... | news | region-hotels
   string method = 2;   // api | bot
   string status = 3;   // ready | failed | skipped
   int32 collected = 4;
@@ -77,7 +96,7 @@ message SourceResult {
 }
 
 message AnalyzeUserResponse {
-  int32 user_id = 1;   // otel: HotelInfo.id; news: 0
+  int32 user_id = 1;   // otel: HotelInfo.id; news: 0; region-hotels: cagiran otel veya -1
   string status = 2;   // completed | cancelled | failed | ...
   repeated SourceResult results = 3;
 }
