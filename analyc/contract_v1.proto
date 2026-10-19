@@ -5,7 +5,7 @@ package analyc.v1;
 // Otel kontrat PDF okuma servisi.
 // Baglanti kopmasi IPTAL DEGILDIR; iptal icin StopExtractContract kullan.
 service ContractService {
-  // Server streaming: PDF okuma / Gemini cikarma / dogrulama / gonderim adimlarini bildirir.
+  // Server streaming: PDF okuma / Gemini cikarma / dogrulama / staging kayit adimlarini bildirir.
   rpc ExtractContract (ExtractContractRequest) returns (stream ContractEvent);
 
   // Devam eden kontrat okumasini durdurur (analyze_runs hotel_id=-2 aktif kayit).
@@ -16,6 +16,7 @@ message ExtractContractRequest {
   int32 hotel_id = 1;   // HotelInfo.id (opsiyonel; 0 = bilinmiyor)
   string file_name = 2; // orijinal dosya adi (log / rapor icin)
   bytes pdf = 3;        // PDF icerigi
+  int32 user_id = 4;    // staging id, zorunlu (0 → INVALID_ARGUMENT)
 }
 
 message ContractCheck {
@@ -27,7 +28,7 @@ message ContractCheck {
 }
 
 // phase: started | pdf_reading | pdf_read | extracting | extracted
-//        | checked | sending | sent | completed | cancelled | failed
+//        | checked | saving | saved | completed | cancelled | failed
 message ContractEvent {
   string phase = 1;
   int32 run_id = 2;
