@@ -6,10 +6,26 @@ service ChatService {
   rpc Guess (GuessRequest) returns (GuessResponse);
   // NPM raporlama: otel yoneticisinin serbest metin sorusu.
   rpc ReportQuery (ReportQueryRequest) returns (ReportQueryResponse);
+  // NPM raporlama DUZENLEME MODU: kayitli bir raporun SQL'ini kucuk bir
+  // degisiklik talebiyle guncelleyip yeniden calistirir. Sema/kural seti
+  // AI'ye tekrar gonderilmedigi icin token maliyeti dusuktur.
+  rpc ReviseReportQuery (ReviseReportQueryRequest) returns (ReportQueryResponse);
+}
+
+message ReviseReportQueryRequest {
+  // Daha once uretilmis ve kaydedilmis SELECT sorgusu.
+  string priorSql = 1;
+  // Kullanicinin kucuk degisiklik talebi, orn. "temmuz icin yap".
+  string changeRequest = 2;
 }
 
 message ReportQueryRequest {
   string question = 1;
+  // Onceki konusma, GuessRequest.chatHistory ile AYNI format: JSON string
+  // olarak serilestirilmis [{ role, parts: [{ text }] }] dizisi.
+  // Gecmis istegin icinde tasinir (backend saklamaz). chat-bot yalnizca son
+  // 5 mesaji dikkate alir; fazlasi gonderilse de kirpilir.
+  string chatHistory = 2;
 }
 
 message ReportQueryResponse {
