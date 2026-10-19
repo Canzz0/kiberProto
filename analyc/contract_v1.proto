@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package analyc.v1;
+
+// Otel kontrat PDF okuma servisi.
+// Baglanti kopmasi IPTAL DEGILDIR; iptal icin StopExtractContract kullan.
+service ContractService {
+  // Server streaming: PDF okuma / Gemini cikarma / dogrulama / gonderim adimlarini bildirir.
+  rpc ExtractContract (ExtractContractRequest) returns (stream ContractEvent);
+
+  // Devam eden kontrat okumasini durdurur (analyze_runs hotel_id=-2 aktif kayit).
+  rpc StopExtractContract (StopExtractContractRequest) returns (StopExtractContractResponse);
+}
+
+message ExtractContractRequest {
+  int32 hotel_id = 1;   // HotelInfo.id (opsiyonel; 0 = bilinmiyor)
+  string file_name = 2; // orijinal dosya adi (log / rapor icin)
+  bytes pdf = 3;        // PDF icerigi
+}
+
+message ContractCheck {
+  int32 price_like_total = 1;
+  int32 price_like_found = 2;
+  repeated string missing = 3;
+  repeated string unknown = 4;
+  bool suspicious = 5;
+}
+
+// phase: started | pdf_reading | pdf_read | extracting | extracted
+//        | checked | sending | sent | completed | cancelled | failed
+message ContractEvent {
+  string phase = 1;
+  int32 run_id = 2;
+  int32 hotel_id = 3;
+  int32 step_index = 4;
+  int32 step_total = 5;
+  string message = 6;
+  string result_json = 7;   // completed / extracted asamasinda JSON string
+  ContractCheck check = 8;  // checked / completed asamasinda
+}
+
+message StopExtractContractRequest {}
+
+message StopExtractContractResponse {
+  string status = 1;   // stopped | not_running
+  string message = 2;
+}
