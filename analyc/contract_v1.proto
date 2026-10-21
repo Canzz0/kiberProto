@@ -42,7 +42,9 @@ message ContractEvent {
   repeated string warnings = 9;  // saved / completed: normalize ve payload uyarilari
 }
 
-message StopExtractContractRequest {}
+message StopExtractContractRequest {
+  int32 user_id = 1;
+}
 
 message StopExtractContractResponse {
   string status = 1;   // stopped | not_running
