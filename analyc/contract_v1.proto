@@ -17,6 +17,7 @@ message ExtractContractRequest {
   string file_name = 2; // orijinal dosya adi (log / rapor icin)
   bytes pdf = 3;        // PDF icerigi
   int32 user_id = 4;    // staging id, zorunlu (0 → INVALID_ARGUMENT)
+  string agency = 5;    // acente adi (panel gonderir, orn. "ANEX"); rehber varsa prompt'a eklenir
 }
 
 message ContractCheck {
@@ -38,6 +39,7 @@ message ContractEvent {
   string message = 6;
   string result_json = 7;   // completed / extracted asamasinda JSON string
   ContractCheck check = 8;  // checked / completed asamasinda
+  repeated string warnings = 9;  // saved / completed: normalize ve payload uyarilari
 }
 
 message StopExtractContractRequest {}
